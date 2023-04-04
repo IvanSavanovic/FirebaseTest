@@ -4,7 +4,7 @@
  *
  * https://github.com/mrousavy/react-native-vision-camera
  * https://github.com/react-native-cameraroll/react-native-cameraroll
- * https://www.npmjs.com/package/react-native-text-recognition
+ * https://www.npmjs.com/package/@react-native-ml-kit/text-recognition?activeTab=readme
  *
  * @format
  */
@@ -13,8 +13,8 @@ import {
   CameraRoll,
   PhotoIdentifier,
 } from '@react-native-camera-roll/camera-roll';
+import TextRecognition from '@react-native-ml-kit/text-recognition';
 import React, {useCallback, useEffect, useRef, useState} from 'react';
-import TextRecognition from 'react-native-text-recognition';
 import type {PropsWithChildren} from 'react';
 import {
   Alert,
@@ -82,7 +82,7 @@ const App = (): JSX.Element => {
     useState<CameraPermissionStatus>('not-determined');
   const [disply, setDisplay] = useState('');
   const [runOCR, setRunOcr] = useState(false);
-  const [ocrText, setOcrText] = useState<string[]>([]);
+  const [ocrText, setOcrText] = useState<string>('');
   const devices = useCameraDevices('wide-angle-camera');
   const device = devices.back;
   const camera = useRef<Camera>(null);
@@ -97,7 +97,7 @@ const App = (): JSX.Element => {
           const result = await TextRecognition.recognize(
             savedPhoto.photos[0].node.image.uri,
           );
-          setOcrText(result);
+          setOcrText(result.text);
         }
       }
     })();
