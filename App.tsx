@@ -172,13 +172,17 @@ function App(): JSX.Element {
           style={backgroundStyle}>
           <Header />
           <View>
-            <Button
-              title="Open camera"
-              onPress={() => {
-                requestCameraPermission();
-              }}
-            />
-            <Button title="Load Images" onPress={loadImages} />
+            <View style={styles.mainScreenButtonContainer}>
+              <Button
+                title="Open camera"
+                onPress={() => {
+                  requestCameraPermission();
+                }}
+              />
+            </View>
+            <View style={styles.mainScreenButtonContainer}>
+              <Button title="Load Images" onPress={loadImages} />
+            </View>
             <ScrollView>
               {savedPhoto &&
                 savedPhoto.photos.map((p, i) => {
@@ -191,7 +195,9 @@ function App(): JSX.Element {
                   );
                 })}
               {savedPhoto && (
-                <Button title="Run OCR" onPress={() => setRunOcr(true)} />
+                <View style={styles.mainScreenButtonContainer}>
+                  <Button title="Run OCR" onPress={() => setRunOcr(true)} />
+                </View>
               )}
               {savedPhoto && ocrText.length > 0 ? (
                 <View style={styles.textView}>
@@ -247,13 +253,15 @@ function App(): JSX.Element {
             photo={true}
           />
           <View style={styles.takePhotoContainer}>
-            <TouchableOpacity style={styles.button} onPress={() => takePhoto()}>
+            <TouchableOpacity
+              style={styles.cameraButton}
+              onPress={() => takePhoto()}>
               <Text>Take Photo</Text>
             </TouchableOpacity>
           </View>
           <View style={styles.closeContainer}>
             <TouchableOpacity
-              style={styles.button}
+              style={styles.cameraButton}
               onPress={() => setDisplay('')}>
               <Text>Close</Text>
             </TouchableOpacity>
@@ -299,6 +307,7 @@ const styles = StyleSheet.create({
   highlight: {
     fontWeight: '700',
   },
+  mainScreenButtonContainer: {padding: 10},
   imageSize: {
     width: 300,
     height: 300,
@@ -308,7 +317,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   cameraSection: {flex: 1, justifyContent: 'space-between'},
-  button: {
+  cameraButton: {
     borderWidth: 1,
     borderColor: '#4f83cc',
     alignItems: 'center',
