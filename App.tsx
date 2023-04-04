@@ -49,7 +49,7 @@ type SectionProps = PropsWithChildren<{
   title: string;
 }>;
 
-function Section({children, title}: SectionProps): JSX.Element {
+const Section = ({children, title}: SectionProps): JSX.Element => {
   const isDarkMode = useColorScheme() === 'dark';
   return (
     <View style={styles.sectionContainer}>
@@ -73,9 +73,9 @@ function Section({children, title}: SectionProps): JSX.Element {
       </Text>
     </View>
   );
-}
+};
 
-function App(): JSX.Element {
+const App = (): JSX.Element => {
   const isDarkMode = useColorScheme() === 'dark';
   const [savedPhoto, setSavedPhoto] = useState<{photos: PhotoIdentifier[]}>();
   const [cameraPermissionStatus, setCameraPermissionStatus] =
@@ -184,16 +184,19 @@ function App(): JSX.Element {
               <Button title="Load Images" onPress={loadImages} />
             </View>
             <ScrollView>
-              {savedPhoto &&
-                savedPhoto.photos.map((p, i) => {
-                  return (
-                    <Image
-                      key={i}
-                      style={styles.imageSize}
-                      source={{uri: p.node.image.uri}}
-                    />
-                  );
-                })}
+              <View style={styles.imageContainer}>
+                {savedPhoto &&
+                  savedPhoto.photos.map((p, i) => {
+                    return (
+                      <View key={i} style={styles.imageDiv}>
+                        <Image
+                          style={styles.imageSize}
+                          source={{uri: p.node.image.uri}}
+                        />
+                      </View>
+                    );
+                  })}
+              </View>
               {savedPhoto && (
                 <View style={styles.mainScreenButtonContainer}>
                   <Button title="Run OCR" onPress={() => setRunOcr(true)} />
@@ -219,9 +222,6 @@ function App(): JSX.Element {
             </Section>
             <Section title="Debug">
               <DebugInstructions />
-            </Section>
-            <Section title="Learn More">
-              Read the docs to discover what to do next:
             </Section>
           </View>
         </ScrollView>
@@ -288,7 +288,7 @@ function App(): JSX.Element {
     default:
       return defaultView();
   }
-}
+};
 
 const styles = StyleSheet.create({
   sectionContainer: {
@@ -308,6 +308,12 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
   mainScreenButtonContainer: {padding: 10},
+  imageContainer: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+  },
+  imageDiv: {padding: 5},
   imageSize: {
     width: 300,
     height: 300,
