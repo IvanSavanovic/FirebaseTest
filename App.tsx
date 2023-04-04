@@ -86,6 +86,9 @@ const App = (): JSX.Element => {
   const devices = useCameraDevices('wide-angle-camera');
   const device = devices.back;
   const camera = useRef<Camera>(null);
+  const backgroundStyle = {
+    backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
+  };
 
   useEffect(() => {
     (async () => {
@@ -99,10 +102,6 @@ const App = (): JSX.Element => {
       }
     })();
   }, [runOCR, savedPhoto]);
-
-  const backgroundStyle = {
-    backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
-  };
 
   const hasAndroidPermission = async () => {
     const permission =
@@ -160,6 +159,36 @@ const App = (): JSX.Element => {
     }
   };
 
+  const renderImageAndOcr = () => {
+    return (
+      <ScrollView>
+        <View style={styles.imageContainer}>
+          {savedPhoto &&
+            savedPhoto.photos.map((p, i) => {
+              return (
+                <View key={i} style={styles.imageDiv}>
+                  <Image
+                    style={styles.imageSize}
+                    source={{uri: p.node.image.uri}}
+                  />
+                </View>
+              );
+            })}
+        </View>
+        {savedPhoto && (
+          <View style={styles.mainScreenButtonContainer}>
+            <Button title="Run OCR" onPress={() => setRunOcr(true)} />
+          </View>
+        )}
+        {savedPhoto && ocrText.length > 0 ? (
+          <View style={styles.textView}>
+            <Text style={styles.sectionDescription}>{ocrText}</Text>
+          </View>
+        ) : null}
+      </ScrollView>
+    );
+  };
+
   const defaultView = () => {
     return (
       <SafeAreaView style={backgroundStyle}>
@@ -183,31 +212,7 @@ const App = (): JSX.Element => {
             <View style={styles.mainScreenButtonContainer}>
               <Button title="Load Images" onPress={loadImages} />
             </View>
-            <ScrollView>
-              <View style={styles.imageContainer}>
-                {savedPhoto &&
-                  savedPhoto.photos.map((p, i) => {
-                    return (
-                      <View key={i} style={styles.imageDiv}>
-                        <Image
-                          style={styles.imageSize}
-                          source={{uri: p.node.image.uri}}
-                        />
-                      </View>
-                    );
-                  })}
-              </View>
-              {savedPhoto && (
-                <View style={styles.mainScreenButtonContainer}>
-                  <Button title="Run OCR" onPress={() => setRunOcr(true)} />
-                </View>
-              )}
-              {savedPhoto && ocrText.length > 0 ? (
-                <View style={styles.textView}>
-                  <Text style={styles.sectionDescription}>{ocrText}</Text>
-                </View>
-              ) : null}
-            </ScrollView>
+            {renderImageAndOcr()}
           </View>
           <View
             style={{
