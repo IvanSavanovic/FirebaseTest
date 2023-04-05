@@ -12,4 +12,4 @@ On Windows - First check [Android Users on New Architecture building on Windows]
 `./gradlew assembleRelease` - to build apk. Apk location `android/app/build/outputs/apk/app-release.apk`.
 
 If error: `Execution failed for task ':app:mergeReleaseResources'`
-        - In `android/app/src/main/res/` delete `drawable-mdpi`
+        - In `android/app/src/main/res/` delete `drawable-mdpi` and run build again.
