@@ -7,14 +7,19 @@ Used packages:
 - [react-native-cameraroll](https://github.com/react-native-cameraroll/react-native-cameraroll)
 - [@react-native-ml-kit/text-recognition](https://www.npmjs.com/package/@react-native-ml-kit/text-recognition?activeTab=readme)
 
+# Run
+- root: `npx react-native run-android`
+- \android: `npx react-native start`
+
 # Build
 On Windows - first check [Android Users on New Architecture building on Windows](https://reactnative.dev/architecture/bundled-hermes#android-users-on-new-architecture-building-on-windows).
 
 ## Steps:
+Steps 1. and 2. needs to be done once for project.
 1.  Make sure you have an assets folder under `android/app/src/main/assets`. If it's not there, create one.
-2. Then in root (needs to be done once):
+2. Then in `root`:
     - `npx react-native bundle --platform android --dev false --entry-file index.js --bundle-output android/app/src/main/assets/index.android.bundle --assets-dest android/app/src/main/res/`
-1. In `/android`: 
+3. In `/android`: 
     - `./gradlew assembleRelease` - to build APK. It is located in `android/app/build/outputs/apk/app-release.apk`.
 
 ### Error:  
