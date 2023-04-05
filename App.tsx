@@ -2,10 +2,6 @@
  * Sample React Native App
  * https://github.com/facebook/react-native
  *
- * https://github.com/mrousavy/react-native-vision-camera
- * https://github.com/react-native-cameraroll/react-native-cameraroll
- * https://www.npmjs.com/package/@react-native-ml-kit/text-recognition?activeTab=readme
- *
  * @format
  */
 

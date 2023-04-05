@@ -1,5 +1,11 @@
 # FirebaseTest
-React Native firebase and OCR
+React Native, firebase and OCR.
+
+Used packages:
+- [firebase](https://rnfirebase.io/)
+- [react-native-vision-camera](https://github.com/mrousavy/react-native-vision-camera)
+- [react-native-cameraroll](https://github.com/react-native-cameraroll/react-native-cameraroll)
+- [@react-native-ml-kit/text-recognition](https://www.npmjs.com/package/@react-native-ml-kit/text-recognition?activeTab=readme)
 
 # Build
 On Windows - First check [Android Users on New Architecture building on Windows](https://reactnative.dev/architecture/bundled-hermes#android-users-on-new-architecture-building-on-windows).
