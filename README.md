@@ -1,5 +1,5 @@
 # FirebaseTest
-React Native, firebase and OCR.
+React native, firebase and OCR.
 
 Used packages:
 - [firebase](https://rnfirebase.io/)
@@ -8,14 +8,16 @@ Used packages:
 - [@react-native-ml-kit/text-recognition](https://www.npmjs.com/package/@react-native-ml-kit/text-recognition?activeTab=readme)
 
 # Build
-On Windows - First check [Android Users on New Architecture building on Windows](https://reactnative.dev/architecture/bundled-hermes#android-users-on-new-architecture-building-on-windows).
+On Windows - first check [Android Users on New Architecture building on Windows](https://reactnative.dev/architecture/bundled-hermes#android-users-on-new-architecture-building-on-windows).
 
 ## Steps:
-1. If in `android/app/src/main/` doesn't exist folder `assets` make it.
+1.  Make sure you have an assets folder under `android/app/src/main/assets`. If it's not there, create one.
 2. Then in root (needs to be done once):
-`npx react-native bundle --platform android --dev false --entry-file index.js --bundle-output android/app/src/main/assets/index.android.bundle --assets-dest android/app/src/main/res/`
-3. In `/android`: 
-`./gradlew assembleRelease` - to build apk. Apk location `android/app/build/outputs/apk/app-release.apk`.
+    - `npx react-native bundle --platform android --dev false --entry-file index.js --bundle-output android/app/src/main/assets/index.android.bundle --assets-dest android/app/src/main/res/`
+1. In `/android`: 
+    - `./gradlew assembleRelease` - to build APK. It is located in `android/app/build/outputs/apk/app-release.apk`.
 
-If error: `Execution failed for task ':app:mergeReleaseResources'`
-        - In `android/app/src/main/res/` delete `drawable-mdpi` and run build again.
+### Error:  
+If your build fails with the following errors:
+- `Execution failed for task ':app:processReleaseResources'` or for `Execution failed for task ':app:mergeReleaseResources'` then in `android/app/src/main/res/` delete `drawable-mdpi` and run build again.
+
