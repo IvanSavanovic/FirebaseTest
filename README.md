@@ -6,7 +6,7 @@ On Windows - First check [Android Users on New Architecture building on Windows]
 
 ## Steps:
 1. If in `android/app/src/main/` doesn't exist folder `assets` make it.
-2. Then in root:
+2. Then in root (needs to be done once):
 `npx react-native bundle --platform android --dev false --entry-file index.js --bundle-output android/app/src/main/assets/index.android.bundle --assets-dest android/app/src/main/res/`
 3. In `/android`: 
 `./gradlew assembleRelease` - to build apk. Apk location `android/app/build/outputs/apk/app-release.apk`.
