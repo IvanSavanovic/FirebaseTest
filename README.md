@@ -7,9 +7,12 @@ Used packages:
 - [react-native-cameraroll](https://github.com/react-native-cameraroll/react-native-cameraroll)
 - [@react-native-ml-kit/text-recognition](https://www.npmjs.com/package/@react-native-ml-kit/text-recognition?activeTab=readme)
 
-# Run
+# Run Dev
 - root: `npx react-native run-android`
 - \android: `npx react-native start`
+
+# Run Build
+- `npx react-native run-android --mode=release`
 
 # Build
 On Windows - first check [Android Users on New Architecture building on Windows](https://reactnative.dev/architecture/bundled-hermes#android-users-on-new-architecture-building-on-windows).

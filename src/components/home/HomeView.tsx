@@ -64,7 +64,7 @@ const Section = ({children, title}: SectionProps): JSX.Element => {
   );
 };
 
-const App = (): JSX.Element => {
+const HomeView = (): JSX.Element => {
   const isDarkMode = useColorScheme() === 'dark';
   const [savedPhoto, setSavedPhoto] = useState<{photos: PhotoIdentifier[]}>();
   const [cameraPermissionStatus, setCameraPermissionStatus] =
@@ -350,4 +350,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default App;
+export default HomeView;
