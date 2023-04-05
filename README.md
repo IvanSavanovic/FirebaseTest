@@ -4,7 +4,7 @@ React Native firebase and OCR
 # Build
 On Windows - First check [Android Users on New Architecture building on Windows](https://reactnative.dev/architecture/bundled-hermes#android-users-on-new-architecture-building-on-windows).
 
-## Commands:
+## Steps:
 1. If in `android/app/src/main/` doesn't exist folder `assets` make it.
 2. Then in root:
 `npx react-native bundle --platform android --dev false --entry-file index.js --bundle-output android/app/src/main/assets/index.android.bundle --assets-dest android/app/src/main/res/`
