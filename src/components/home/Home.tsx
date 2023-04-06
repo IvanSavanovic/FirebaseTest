@@ -5,6 +5,7 @@ import {
 import TextRecognition from '@react-native-ml-kit/text-recognition';
 import React, {useCallback, useEffect, useRef, useState} from 'react';
 import {
+  ActivityIndicator,
   Alert,
   Button,
   Image,
@@ -28,9 +29,9 @@ import {
 
 import {
   Colors,
-  DebugInstructions,
+  //DebugInstructions,
   Header,
-  ReloadInstructions,
+  //ReloadInstructions,
 } from 'react-native/Libraries/NewAppScreen';
 import Section from '../shared/Section/Section';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
@@ -38,12 +39,12 @@ import {RootStackParamList} from '../../App';
 
 type HomeProps = NativeStackScreenProps<RootStackParamList, 'Home', 'Home'>;
 
-const HomeView = ({navigation}: HomeProps): JSX.Element => {
+const Home = ({navigation}: HomeProps): JSX.Element => {
   const isDarkMode = useColorScheme() === 'dark';
   const [savedPhoto, setSavedPhoto] = useState<{photos: PhotoIdentifier[]}>();
   const [cameraPermissionStatus, setCameraPermissionStatus] =
     useState<CameraPermissionStatus>('not-determined');
-  const [disply, setDisplay] = useState('');
+  const [display, setDisplay] = useState('');
   const [runOCR, setRunOcr] = useState(false);
   const [ocrText, setOcrText] = useState<string>('');
   const devices = useCameraDevices('wide-angle-camera');
@@ -61,10 +62,12 @@ const HomeView = ({navigation}: HomeProps): JSX.Element => {
             savedPhoto.photos[0].node.image.uri,
           );
           setOcrText(result.text);
+          setRunOcr(false);
+          navigation.navigate('Ocr', {ocrText: result.text});
         }
       }
     })();
-  }, [runOCR, savedPhoto]);
+  }, [navigation, runOCR, savedPhoto]);
 
   const hasAndroidPermission = async () => {
     const permission =
@@ -122,36 +125,103 @@ const HomeView = ({navigation}: HomeProps): JSX.Element => {
     }
   };
 
-  const renderImageAndOcr = () => {
+  const renderLoading = () => {
     return (
-      <ScrollView>
-        <View style={styles.imageContainer}>
-          {savedPhoto &&
-            savedPhoto.photos.map((p, i) => {
-              return (
-                <View key={i} style={styles.imageDiv}>
-                  <Image
-                    style={styles.imageSize}
-                    source={{uri: p.node.image.uri}}
-                  />
-                </View>
-              );
-            })}
-        </View>
-        {savedPhoto && (
-          <View style={styles.mainScreenButtonContainer}>
-            <Button title="Run OCR" onPress={() => setRunOcr(true)} />
-          </View>
-        )}
-        {savedPhoto && ocrText.length > 0 ? (
-          <View style={styles.textView}>
-            <Text selectable={true} style={styles.sectionDescription}>
-              {ocrText}
-            </Text>
-          </View>
-        ) : null}
-      </ScrollView>
+      <View key={ocrText} style={styles.loadingButtonContainer}>
+        <ActivityIndicator size="large" color={'#2196F3'} />
+      </View>
     );
+  };
+
+  const renderImageAndOcr = () => {
+    if (runOCR === false) {
+      return (
+        <ScrollView>
+          <View style={styles.imageContainer}>
+            {savedPhoto &&
+              savedPhoto.photos.map((p, i) => {
+                return (
+                  <View key={i} style={styles.imageDiv}>
+                    <Image
+                      style={styles.imageSize}
+                      source={{uri: p.node.image.uri}}
+                    />
+                  </View>
+                );
+              })}
+          </View>
+          {savedPhoto && runOCR === false && (
+            <View style={styles.mainScreenButtonContainer}>
+              <Button
+                title="Run OCR"
+                onPress={() => {
+                  setRunOcr(true);
+                }}
+              />
+            </View>
+          )}
+        </ScrollView>
+      );
+    } else {
+      return renderLoading();
+    }
+  };
+
+  const cameraView = () => {
+    if (device == null) {
+      return (
+        <View
+          style={{
+            backgroundColor: isDarkMode ? Colors.black : Colors.white,
+          }}>
+          <Section title="No device">
+            There is <Text style={styles.highlight}>No Device</Text>
+          </Section>
+        </View>
+      );
+    }
+    if (cameraPermissionStatus === 'authorized') {
+      return (
+        <SafeAreaView key={display} style={styles.cameraView}>
+          <Camera
+            style={styles.cameraSection}
+            device={device}
+            isActive={true}
+            ref={camera}
+            photo={true}
+          />
+          <View style={styles.takePhotoContainer}>
+            <TouchableOpacity
+              style={styles.cameraButton}
+              onPress={() => {
+                takePhoto();
+              }}>
+              <Text style={styles.cameraButtonText}>Take Photo</Text>
+            </TouchableOpacity>
+          </View>
+          <View style={styles.closeContainer}>
+            <TouchableOpacity
+              style={styles.cameraButton}
+              onPress={() => {
+                setDisplay('');
+              }}>
+              <Text style={styles.cameraButtonText}>Close</Text>
+            </TouchableOpacity>
+          </View>
+        </SafeAreaView>
+      );
+    } else {
+      return (
+        <View
+          style={{
+            backgroundColor: isDarkMode ? Colors.black : Colors.white,
+          }}>
+          <Section title="No device or no camera authorization">
+            <Text style={styles.highlight}>Something went wrong!</Text>
+          </Section>
+        </View>
+      );
+    }
   };
 
   const defaultView = () => {
@@ -178,23 +248,8 @@ const HomeView = ({navigation}: HomeProps): JSX.Element => {
               <Button title="Load Image" onPress={loadImages} />
             </View>
             {renderImageAndOcr()}
-          </View>
-          <View
-            style={{
-              backgroundColor: isDarkMode ? Colors.black : Colors.white,
-            }}>
-            <Section title="Step One">
-              Edit <Text style={styles.highlight}>App.tsx</Text> to change this
-              screen and then come back to see your edits.
-            </Section>
-            <Section title="See Your Changes">
-              <ReloadInstructions />
-            </Section>
-            <Section title="Debug">
-              <DebugInstructions />
-            </Section>
             <Section title="Test screen">
-              <Text>Profile test screen for navigation.</Text>
+              <Text>"Profile" screen for testing navigation.</Text>
             </Section>
             <View style={styles.mainScreenButtonContainer}>
               <Button
@@ -208,60 +263,7 @@ const HomeView = ({navigation}: HomeProps): JSX.Element => {
     );
   };
 
-  const cameraView = () => {
-    if (device == null) {
-      return (
-        <View
-          style={{
-            backgroundColor: isDarkMode ? Colors.black : Colors.white,
-          }}>
-          <Section title="No device">
-            There is <Text style={styles.highlight}>No Device</Text>
-          </Section>
-        </View>
-      );
-    }
-    if (cameraPermissionStatus === 'authorized') {
-      return (
-        <SafeAreaView key={disply} style={styles.cameraView}>
-          <Camera
-            style={styles.cameraSection}
-            device={device}
-            isActive={true}
-            ref={camera}
-            photo={true}
-          />
-          <View style={styles.takePhotoContainer}>
-            <TouchableOpacity
-              style={styles.cameraButton}
-              onPress={() => takePhoto()}>
-              <Text>Take Photo</Text>
-            </TouchableOpacity>
-          </View>
-          <View style={styles.closeContainer}>
-            <TouchableOpacity
-              style={styles.cameraButton}
-              onPress={() => setDisplay('')}>
-              <Text>Close</Text>
-            </TouchableOpacity>
-          </View>
-        </SafeAreaView>
-      );
-    } else {
-      return (
-        <View
-          style={{
-            backgroundColor: isDarkMode ? Colors.black : Colors.white,
-          }}>
-          <Section title="No device or no camera authorization">
-            <Text style={styles.highlight}>Something went wrong!</Text>
-          </Section>
-        </View>
-      );
-    }
-  };
-
-  switch (disply) {
+  switch (display) {
     case 'camera':
       return cameraView();
     default:
@@ -296,7 +298,7 @@ const styles = StyleSheet.create({
   cameraSection: {flex: 1, justifyContent: 'space-between'},
   cameraButton: {
     borderWidth: 1,
-    borderColor: '#4f83cc',
+    borderColor: '##2196F3',
     alignItems: 'center',
     justifyContent: 'center',
     width: '180%',
@@ -312,6 +314,9 @@ const styles = StyleSheet.create({
     },
     elevation: 6,
   },
+  cameraButtonText: {
+    color: '#000000',
+  },
   textView: {
     padding: 20,
   },
@@ -325,6 +330,14 @@ const styles = StyleSheet.create({
     top: '1%',
     right: '8%',
   },
+  loadingButtonContainer: {
+    height: 465,
+    padding: 30,
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
 });
 
-export default HomeView;
+export default Home;
