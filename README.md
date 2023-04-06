@@ -8,6 +8,7 @@ Used packages:
 - [react-native-vision-camera](https://github.com/mrousavy/react-native-vision-camera)
 - [react-native-cameraroll](https://github.com/react-native-cameraroll/react-native-cameraroll)
 - [@react-native-ml-kit/text-recognition](https://www.npmjs.com/package/@react-native-ml-kit/text-recognition?activeTab=readme)
+- [@react-native-clipboard/clipboard](https://github.com/react-native-clipboard/clipboard)
 
 ## Run Dev
 
