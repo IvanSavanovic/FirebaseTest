@@ -4,7 +4,6 @@ import {
 } from '@react-native-camera-roll/camera-roll';
 import TextRecognition from '@react-native-ml-kit/text-recognition';
 import React, {useCallback, useEffect, useRef, useState} from 'react';
-import type {PropsWithChildren} from 'react';
 import {
   Alert,
   Button,
@@ -33,38 +32,13 @@ import {
   Header,
   ReloadInstructions,
 } from 'react-native/Libraries/NewAppScreen';
+import Section from '../shared/Section/Section';
+import {NativeStackScreenProps} from '@react-navigation/native-stack';
+import {RootStackParamList} from '../../App';
 
-type SectionProps = PropsWithChildren<{
-  title: string;
-}>;
+type HomeProps = NativeStackScreenProps<RootStackParamList, 'Home', 'Home'>;
 
-const Section = ({children, title}: SectionProps): JSX.Element => {
-  const isDarkMode = useColorScheme() === 'dark';
-  return (
-    <View style={styles.sectionContainer}>
-      <Text
-        style={[
-          styles.sectionTitle,
-          {
-            color: isDarkMode ? Colors.white : Colors.black,
-          },
-        ]}>
-        {title}
-      </Text>
-      <Text
-        style={[
-          styles.sectionDescription,
-          {
-            color: isDarkMode ? Colors.light : Colors.dark,
-          },
-        ]}>
-        {children}
-      </Text>
-    </View>
-  );
-};
-
-const HomeView = (): JSX.Element => {
+const HomeView = ({navigation}: HomeProps): JSX.Element => {
   const isDarkMode = useColorScheme() === 'dark';
   const [savedPhoto, setSavedPhoto] = useState<{photos: PhotoIdentifier[]}>();
   const [cameraPermissionStatus, setCameraPermissionStatus] =
@@ -171,7 +145,9 @@ const HomeView = (): JSX.Element => {
         )}
         {savedPhoto && ocrText.length > 0 ? (
           <View style={styles.textView}>
-            <Text style={styles.sectionDescription}>{ocrText}</Text>
+            <Text selectable={true} style={styles.sectionDescription}>
+              {ocrText}
+            </Text>
           </View>
         ) : null}
       </ScrollView>
@@ -199,7 +175,7 @@ const HomeView = (): JSX.Element => {
               />
             </View>
             <View style={styles.mainScreenButtonContainer}>
-              <Button title="Load Images" onPress={loadImages} />
+              <Button title="Load Image" onPress={loadImages} />
             </View>
             {renderImageAndOcr()}
           </View>
@@ -217,6 +193,15 @@ const HomeView = (): JSX.Element => {
             <Section title="Debug">
               <DebugInstructions />
             </Section>
+            <Section title="Test screen">
+              <Text>Profile test screen for navigation.</Text>
+            </Section>
+            <View style={styles.mainScreenButtonContainer}>
+              <Button
+                title="Profile"
+                onPress={() => navigation.navigate('Profile', {id: '23'})}
+              />
+            </View>
           </View>
         </ScrollView>
       </SafeAreaView>
@@ -285,14 +270,6 @@ const HomeView = (): JSX.Element => {
 };
 
 const styles = StyleSheet.create({
-  sectionContainer: {
-    marginTop: 32,
-    paddingHorizontal: 24,
-  },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: '600',
-  },
   sectionDescription: {
     marginTop: 8,
     fontSize: 18,
@@ -310,7 +287,7 @@ const styles = StyleSheet.create({
   imageDiv: {padding: 5},
   imageSize: {
     width: 300,
-    height: 300,
+    height: 400,
   },
   cameraView: {
     display: 'flex',
