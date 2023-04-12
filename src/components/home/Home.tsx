@@ -5,18 +5,16 @@ import {
 import TextRecognition from '@react-native-ml-kit/text-recognition';
 import React, {useCallback, useEffect, useRef, useState} from 'react';
 import {
-  ActivityIndicator,
-  Alert,
   Button,
   Image,
   Linking,
   PermissionsAndroid,
   Platform,
   SafeAreaView,
-  ScrollView,
   StatusBar,
   StyleSheet,
   Text,
+  ToastAndroid,
   TouchableOpacity,
   useColorScheme,
   View,
@@ -30,14 +28,15 @@ import {
 import {
   Colors,
   //DebugInstructions,
-  Header,
+  //Header,
   //ReloadInstructions,
 } from 'react-native/Libraries/NewAppScreen';
 import Section from '../shared/Section/Section';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import {RootStackParamList} from '../../App';
+import Loading from '../shared/LoadingScreen/Loading';
 
-type HomeProps = NativeStackScreenProps<RootStackParamList, 'Home', 'Home'>;
+type HomeProps = NativeStackScreenProps<RootStackParamList, 'Home', 'Login'>;
 
 const Home = ({navigation}: HomeProps): JSX.Element => {
   const isDarkMode = useColorScheme() === 'dark';
@@ -46,7 +45,6 @@ const Home = ({navigation}: HomeProps): JSX.Element => {
     useState<CameraPermissionStatus>('not-determined');
   const [display, setDisplay] = useState('');
   const [runOCR, setRunOcr] = useState(false);
-  const [ocrText, setOcrText] = useState<string>('');
   const devices = useCameraDevices('wide-angle-camera');
   const device = devices.back;
   const camera = useRef<Camera>(null);
@@ -61,9 +59,10 @@ const Home = ({navigation}: HomeProps): JSX.Element => {
           const result = await TextRecognition.recognize(
             savedPhoto.photos[0].node.image.uri,
           );
-          setOcrText(result.text);
           setRunOcr(false);
-          navigation.navigate('Ocr', {ocrText: result.text});
+          navigation.navigate('Ocr', {
+            ocrText: result.text,
+          });
         }
       }
     })();
@@ -103,13 +102,13 @@ const Home = ({navigation}: HomeProps): JSX.Element => {
     if (Platform.OS === 'android' && !(await hasAndroidPermission())) {
       return;
     } else {
+      setDisplay('image');
       CameraRoll.getPhotos({
         first: 1,
         assetType: 'Photos',
       })
         .then(r => {
           setSavedPhoto({photos: r.edges});
-          console.log(savedPhoto?.photos[0].node.image.uri);
         })
         .catch(err => {
           console.error(err);
@@ -121,49 +120,52 @@ const Home = ({navigation}: HomeProps): JSX.Element => {
     if (camera && camera.current) {
       const photo = await camera.current.takePhoto({});
       CameraRoll.save(photo.path);
-      Alert.alert('', 'Photo Taken');
+      ToastAndroid.show('Photo Taken', ToastAndroid.SHORT);
     }
   };
 
-  const renderLoading = () => {
-    return (
-      <View key={ocrText} style={styles.loadingButtonContainer}>
-        <ActivityIndicator size="large" color={'#2196F3'} />
-      </View>
-    );
-  };
-
   const renderImageAndOcr = () => {
+    if (savedPhoto === undefined) {
+      return <Loading />;
+    }
     if (runOCR === false) {
       return (
-        <ScrollView>
-          <View style={styles.imageContainer}>
-            {savedPhoto &&
-              savedPhoto.photos.map((p, i) => {
-                return (
-                  <View key={i} style={styles.imageDiv}>
-                    <Image
-                      style={styles.imageSize}
-                      source={{uri: p.node.image.uri}}
-                    />
-                  </View>
-                );
-              })}
-          </View>
-          {savedPhoto && runOCR === false && (
-            <View style={styles.mainScreenButtonContainer}>
-              <Button
-                title="Run OCR"
-                onPress={() => {
-                  setRunOcr(true);
-                }}
-              />
+        <View style={styles.imageContainer}>
+          {savedPhoto &&
+            savedPhoto.photos.map((p, i) => {
+              return (
+                <View key={i} style={styles.imageDiv}>
+                  <Image
+                    style={styles.imageSize}
+                    source={{uri: p.node.image.uri}}
+                  />
+                </View>
+              );
+            })}
+          {savedPhoto && (
+            <View style={styles.imageButtonDiv}>
+              <View style={styles.imageButton}>
+                <Button
+                  title="Run OCR"
+                  onPress={() => {
+                    setRunOcr(true);
+                  }}
+                />
+              </View>
+              <View style={styles.imageButton}>
+                <Button
+                  title="Back"
+                  onPress={() => {
+                    setDisplay('');
+                  }}
+                />
+              </View>
             </View>
           )}
-        </ScrollView>
+        </View>
       );
     } else {
-      return renderLoading();
+      return <Loading />;
     }
   };
 
@@ -226,39 +228,24 @@ const Home = ({navigation}: HomeProps): JSX.Element => {
 
   const defaultView = () => {
     return (
-      <SafeAreaView style={backgroundStyle}>
+      <SafeAreaView style={[styles.safeAreaViewStyle, backgroundStyle]}>
         <StatusBar
           barStyle={isDarkMode ? 'light-content' : 'dark-content'}
           backgroundColor={backgroundStyle.backgroundColor}
         />
-        <ScrollView
-          contentInsetAdjustmentBehavior="automatic"
-          style={backgroundStyle}>
-          <Header />
-          <View>
-            <View style={styles.mainScreenButtonContainer}>
-              <Button
-                title="Open camera"
-                onPress={() => {
-                  requestCameraPermission();
-                }}
-              />
-            </View>
-            <View style={styles.mainScreenButtonContainer}>
-              <Button title="Load Image" onPress={loadImages} />
-            </View>
-            {renderImageAndOcr()}
-            <Section title="Test screen">
-              <Text>"Profile" screen for testing navigation.</Text>
-            </Section>
-            <View style={styles.mainScreenButtonContainer}>
-              <Button
-                title="Profile"
-                onPress={() => navigation.navigate('Profile', {id: '23'})}
-              />
-            </View>
+        <View style={styles.buttonContainer}>
+          <View style={styles.buttonStyle}>
+            <Button
+              title="Open camera"
+              onPress={() => {
+                requestCameraPermission();
+              }}
+            />
           </View>
-        </ScrollView>
+          <View style={styles.buttonStyle}>
+            <Button title="Load Image" onPress={loadImages} />
+          </View>
+        </View>
       </SafeAreaView>
     );
   };
@@ -266,24 +253,28 @@ const Home = ({navigation}: HomeProps): JSX.Element => {
   switch (display) {
     case 'camera':
       return cameraView();
+    case 'image':
+      return renderImageAndOcr();
     default:
       return defaultView();
   }
 };
 
 const styles = StyleSheet.create({
-  sectionDescription: {
-    marginTop: 8,
-    fontSize: 18,
-    fontWeight: '400',
+  safeAreaViewStyle: {
+    flex: 1,
+    justifyContent: 'center',
   },
   highlight: {
     fontWeight: '700',
   },
-  mainScreenButtonContainer: {padding: 10},
+  buttonContainer: {
+    justifyContent: 'center',
+  },
+  buttonStyle: {padding: 10},
   imageContainer: {
-    display: 'flex',
-    flexDirection: 'column',
+    flex: 1,
+    justifyContent: 'center',
     alignItems: 'center',
   },
   imageDiv: {padding: 5},
@@ -291,6 +282,8 @@ const styles = StyleSheet.create({
     width: 300,
     height: 400,
   },
+  imageButtonDiv: {width: '100%'},
+  imageButton: {width: '100%', padding: 10},
   cameraView: {
     display: 'flex',
     flex: 1,
@@ -329,14 +322,6 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: '1%',
     right: '8%',
-  },
-  loadingButtonContainer: {
-    height: 465,
-    padding: 30,
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    justifyContent: 'center',
   },
 });
 
