@@ -5,7 +5,6 @@ import {
 import TextRecognition from '@react-native-ml-kit/text-recognition';
 import React, {useCallback, useEffect, useRef, useState} from 'react';
 import {
-  Button,
   Image,
   Linking,
   PermissionsAndroid,
@@ -13,24 +12,18 @@ import {
   SafeAreaView,
   StatusBar,
   StyleSheet,
-  Text,
   ToastAndroid,
   TouchableOpacity,
   useColorScheme,
   View,
 } from 'react-native';
+import {Text, Button, useTheme} from 'react-native-paper';
 import {
   Camera,
   CameraPermissionStatus,
   useCameraDevices,
 } from 'react-native-vision-camera';
 
-import {
-  Colors,
-  //DebugInstructions,
-  //Header,
-  //ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
 import Section from '../shared/Section/Section';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import {RootStackParamList} from '../../App';
@@ -38,19 +31,17 @@ import Loading from '../shared/LoadingScreen/Loading';
 
 type HomeProps = NativeStackScreenProps<RootStackParamList, 'Home', 'Login'>;
 
-const Home = ({navigation}: HomeProps): JSX.Element => {
+const Home = ({navigation, route}: HomeProps): JSX.Element => {
   const isDarkMode = useColorScheme() === 'dark';
   const [savedPhoto, setSavedPhoto] = useState<{photos: PhotoIdentifier[]}>();
   const [cameraPermissionStatus, setCameraPermissionStatus] =
     useState<CameraPermissionStatus>('not-determined');
-  const [display, setDisplay] = useState('');
+  const [display, setDisplay] = useState('default');
   const [runOCR, setRunOcr] = useState(false);
   const devices = useCameraDevices('wide-angle-camera');
   const device = devices.back;
   const camera = useRef<Camera>(null);
-  const backgroundStyle = {
-    backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
-  };
+  const theme = useTheme();
 
   useEffect(() => {
     (async () => {
@@ -67,6 +58,12 @@ const Home = ({navigation}: HomeProps): JSX.Element => {
       }
     })();
   }, [navigation, runOCR, savedPhoto]);
+
+  useEffect(() => {
+    if (route.params.display === 'default') {
+      setDisplay('default');
+    }
+  }, [route.params.display]);
 
   const hasAndroidPermission = async () => {
     const permission =
@@ -146,19 +143,21 @@ const Home = ({navigation}: HomeProps): JSX.Element => {
             <View style={styles.imageButtonDiv}>
               <View style={styles.imageButton}>
                 <Button
-                  title="Run OCR"
+                  mode="contained"
                   onPress={() => {
                     setRunOcr(true);
-                  }}
-                />
+                  }}>
+                  Run OCR
+                </Button>
               </View>
               <View style={styles.imageButton}>
                 <Button
-                  title="Back"
+                  mode="contained"
                   onPress={() => {
                     setDisplay('');
-                  }}
-                />
+                  }}>
+                  Back
+                </Button>
               </View>
             </View>
           )}
@@ -174,10 +173,12 @@ const Home = ({navigation}: HomeProps): JSX.Element => {
       return (
         <View
           style={{
-            backgroundColor: isDarkMode ? Colors.black : Colors.white,
+            backgroundColor: theme.colors.background,
           }}>
           <Section title="No device">
-            There is <Text style={styles.highlight}>No Device</Text>
+            <Text style={{color: theme.colors.error}}>
+              There is <Text style={styles.highlight}>No Device!</Text>
+            </Text>
           </Section>
         </View>
       );
@@ -198,7 +199,7 @@ const Home = ({navigation}: HomeProps): JSX.Element => {
               onPress={() => {
                 takePhoto();
               }}>
-              <Text style={styles.cameraButtonText}>Take Photo</Text>
+              <Text style={{color: theme.colors.primary}}>Take Photo</Text>
             </TouchableOpacity>
           </View>
           <View style={styles.closeContainer}>
@@ -207,7 +208,7 @@ const Home = ({navigation}: HomeProps): JSX.Element => {
               onPress={() => {
                 setDisplay('');
               }}>
-              <Text style={styles.cameraButtonText}>Close</Text>
+              <Text style={{color: theme.colors.primary}}>Close</Text>
             </TouchableOpacity>
           </View>
         </SafeAreaView>
@@ -216,10 +217,12 @@ const Home = ({navigation}: HomeProps): JSX.Element => {
       return (
         <View
           style={{
-            backgroundColor: isDarkMode ? Colors.black : Colors.white,
+            backgroundColor: theme.colors.background,
           }}>
           <Section title="No device or no camera authorization">
-            <Text style={styles.highlight}>Something went wrong!</Text>
+            <Text style={[styles.highlight, {color: theme.colors.error}]}>
+              Something went wrong!
+            </Text>
           </Section>
         </View>
       );
@@ -228,22 +231,29 @@ const Home = ({navigation}: HomeProps): JSX.Element => {
 
   const defaultView = () => {
     return (
-      <SafeAreaView style={[styles.safeAreaViewStyle, backgroundStyle]}>
+      <SafeAreaView
+        style={[
+          styles.safeAreaViewStyle,
+          {backgroundColor: theme.colors.background},
+        ]}>
         <StatusBar
           barStyle={isDarkMode ? 'light-content' : 'dark-content'}
-          backgroundColor={backgroundStyle.backgroundColor}
+          backgroundColor={theme.colors.background}
         />
         <View style={styles.buttonContainer}>
           <View style={styles.buttonStyle}>
             <Button
-              title="Open camera"
+              mode="contained"
               onPress={() => {
                 requestCameraPermission();
-              }}
-            />
+              }}>
+              Open camera
+            </Button>
           </View>
           <View style={styles.buttonStyle}>
-            <Button title="Load Image" onPress={loadImages} />
+            <Button mode="contained" onPress={loadImages}>
+              Load Image
+            </Button>
           </View>
         </View>
       </SafeAreaView>
@@ -306,9 +316,6 @@ const styles = StyleSheet.create({
       height: 5.5,
     },
     elevation: 6,
-  },
-  cameraButtonText: {
-    color: '#000000',
   },
   textView: {
     padding: 20,

@@ -1,10 +1,13 @@
 import React from 'react';
-import {View, ActivityIndicator, StyleSheet} from 'react-native';
+import {View, StyleSheet} from 'react-native';
+import {useTheme, ActivityIndicator} from 'react-native-paper';
 
 const Loading = () => {
+  const theme = useTheme();
+
   return (
     <View style={styles.loadingButtonContainer}>
-      <ActivityIndicator size="large" color={'#2196F3'} />
+      <ActivityIndicator size="large" color={theme.colors.primary} />
     </View>
   );
 };

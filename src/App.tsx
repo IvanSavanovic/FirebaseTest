@@ -26,10 +26,16 @@ export type RootStackParamList = {
   Login: {};
   /** Register screen */
   Register: {};
-  /** Home screen, id is just example of passing params */
-  Home: {id?: string};
+  /** Home screen */
+  Home: {
+    /** Display camera, image or default */
+    display?: string;
+  };
   /** Ocr text screen */
-  Ocr: {ocrText: string};
+  Ocr: {
+    /** Text that is result of OCR */
+    ocrText: string;
+  };
 };
 
 const App = (): JSX.Element => {
