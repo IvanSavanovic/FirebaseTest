@@ -63,6 +63,7 @@ const Login = ({navigation}: LoginProps) => {
         placeholder="Email"
         inputMode="email"
         autoComplete="email"
+        autoCapitalize="none"
       />
       <TextInput
         style={[styles.input, {color: theme.colors.onSurface}]}
@@ -72,6 +73,7 @@ const Login = ({navigation}: LoginProps) => {
         inputMode="text"
         secureTextEntry={isPasswordSecure}
         autoComplete="password"
+        autoCapitalize="none"
         right={
           <TextInput.Icon
             icon={() => {

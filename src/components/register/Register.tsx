@@ -93,6 +93,7 @@ const Register = ({navigation}: RegisterProps) => {
         placeholder="Email"
         inputMode="email"
         autoComplete="email"
+        autoCapitalize="none"
       />
       <TextInput
         style={styles.input}
@@ -102,6 +103,7 @@ const Register = ({navigation}: RegisterProps) => {
         inputMode="text"
         secureTextEntry={isPasswordSecure}
         autoComplete="password"
+        autoCapitalize="none"
         right={
           <TextInput.Icon
             icon={() => {
@@ -124,6 +126,7 @@ const Register = ({navigation}: RegisterProps) => {
         inputMode="text"
         secureTextEntry={isConfirmPasswordSecure}
         autoComplete="password"
+        autoCapitalize="none"
         right={
           <TextInput.Icon
             icon={() => {

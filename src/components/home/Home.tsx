@@ -10,6 +10,7 @@ import {
   PermissionsAndroid,
   Platform,
   SafeAreaView,
+  ScrollView,
   StatusBar,
   StyleSheet,
   ToastAndroid,
@@ -34,10 +35,13 @@ type HomeProps = NativeStackScreenProps<RootStackParamList, 'Home', 'Login'>;
 const Home = ({navigation, route}: HomeProps): JSX.Element => {
   const isDarkMode = useColorScheme() === 'dark';
   const [savedPhoto, setSavedPhoto] = useState<{photos: PhotoIdentifier[]}>();
+
   const [cameraPermissionStatus, setCameraPermissionStatus] =
     useState<CameraPermissionStatus>('not-determined');
-  const [display, setDisplay] = useState('default');
-  const [runOCR, setRunOcr] = useState(false);
+  const [display, setDisplay] = useState<string>('default');
+  const [runOCR, setRunOcr] = useState<boolean>(false);
+  const [loadingImage, setLoadingImage] = useState<boolean>(false);
+  const [loadingCamera, setLoadingCamera] = useState<boolean>(false);
   const devices = useCameraDevices('wide-angle-camera');
   const device = devices.back;
   const camera = useRef<Camera>(null);
@@ -81,6 +85,7 @@ const Home = ({navigation, route}: HomeProps): JSX.Element => {
   };
 
   const requestCameraPermission = useCallback(async () => {
+    setLoadingCamera(true);
     console.log('Requesting camera permission...');
     const permission = await Camera.requestCameraPermission();
     console.log(`Camera permission status: ${permission}`);
@@ -92,10 +97,14 @@ const Home = ({navigation, route}: HomeProps): JSX.Element => {
 
     if (permission === 'authorized') {
       setDisplay('camera');
+      setLoadingCamera(false);
+    } else {
+      setLoadingCamera(false);
     }
   }, []);
 
   const loadImages = async () => {
+    setLoadingImage(true);
     if (Platform.OS === 'android' && !(await hasAndroidPermission())) {
       return;
     } else {
@@ -111,6 +120,7 @@ const Home = ({navigation, route}: HomeProps): JSX.Element => {
           console.error(err);
         });
     }
+    setLoadingImage(false);
   };
 
   const takePhoto = async () => {
@@ -121,47 +131,56 @@ const Home = ({navigation, route}: HomeProps): JSX.Element => {
     }
   };
 
+  const focusePhoto = async () => {
+    if (camera && camera.current) {
+      await camera.current.focus({x: 300, y: 300});
+    }
+  };
+
   const renderImageAndOcr = () => {
     if (savedPhoto === undefined) {
       return <Loading />;
     }
     if (runOCR === false) {
       return (
-        <View style={styles.imageContainer}>
-          {savedPhoto &&
-            savedPhoto.photos.map((p, i) => {
-              return (
-                <View key={i} style={styles.imageDiv}>
-                  <Image
-                    style={styles.imageSize}
-                    source={{uri: p.node.image.uri}}
-                  />
+        <ScrollView>
+          <View style={styles.imageContainer}>
+            {savedPhoto &&
+              savedPhoto.photos.map((p, i) => {
+                return (
+                  <View key={i} style={styles.imageDiv}>
+                    <Image
+                      style={styles.imageSize}
+                      source={{uri: p.node.image.uri}}
+                      resizeMode="contain"
+                    />
+                  </View>
+                );
+              })}
+            {savedPhoto && (
+              <View style={styles.imageButtonDiv}>
+                <View style={styles.imageButton}>
+                  <Button
+                    mode="contained"
+                    onPress={() => {
+                      setRunOcr(true);
+                    }}>
+                    Run OCR
+                  </Button>
                 </View>
-              );
-            })}
-          {savedPhoto && (
-            <View style={styles.imageButtonDiv}>
-              <View style={styles.imageButton}>
-                <Button
-                  mode="contained"
-                  onPress={() => {
-                    setRunOcr(true);
-                  }}>
-                  Run OCR
-                </Button>
+                <View style={styles.imageButton}>
+                  <Button
+                    mode="contained"
+                    onPress={() => {
+                      setDisplay('');
+                    }}>
+                    Back
+                  </Button>
+                </View>
               </View>
-              <View style={styles.imageButton}>
-                <Button
-                  mode="contained"
-                  onPress={() => {
-                    setDisplay('');
-                  }}>
-                  Back
-                </Button>
-              </View>
-            </View>
-          )}
-        </View>
+            )}
+          </View>
+        </ScrollView>
       );
     } else {
       return <Loading />;
@@ -198,8 +217,11 @@ const Home = ({navigation, route}: HomeProps): JSX.Element => {
               style={styles.cameraButton}
               onPress={() => {
                 takePhoto();
+              }}
+              onPressIn={() => {
+                focusePhoto();
               }}>
-              <Text style={{color: theme.colors.primary}}>Take Photo</Text>
+              <Text style={{color: theme.colors.onPrimary}}>Take Photo</Text>
             </TouchableOpacity>
           </View>
           <View style={styles.closeContainer}>
@@ -208,7 +230,7 @@ const Home = ({navigation, route}: HomeProps): JSX.Element => {
               onPress={() => {
                 setDisplay('');
               }}>
-              <Text style={{color: theme.colors.primary}}>Close</Text>
+              <Text style={{color: theme.colors.onPrimary}}>Close</Text>
             </TouchableOpacity>
           </View>
         </SafeAreaView>
@@ -243,6 +265,7 @@ const Home = ({navigation, route}: HomeProps): JSX.Element => {
         <View style={styles.buttonContainer}>
           <View style={styles.buttonStyle}>
             <Button
+              loading={loadingCamera}
               mode="contained"
               onPress={() => {
                 requestCameraPermission();
@@ -251,7 +274,10 @@ const Home = ({navigation, route}: HomeProps): JSX.Element => {
             </Button>
           </View>
           <View style={styles.buttonStyle}>
-            <Button mode="contained" onPress={loadImages}>
+            <Button
+              loading={loadingImage}
+              mode="contained"
+              onPress={loadImages}>
               Load Image
             </Button>
           </View>
@@ -289,7 +315,7 @@ const styles = StyleSheet.create({
   },
   imageDiv: {padding: 5},
   imageSize: {
-    width: 300,
+    width: 320,
     height: 400,
   },
   imageButtonDiv: {width: '100%'},

@@ -13,6 +13,7 @@ Used packages:
 - [@react-navigation](https://reactnative.dev/docs/navigation)
 - [@react-native-paper](https://callstack.github.io/react-native-paper/docs/guides/getting-started/)
 - [@pictogrammers-icons](https://pictogrammers.com/library/mdi/)
+- [@react-native-image-crop-picker](https://github.com/ivpusic/react-native-image-crop-picker#readme)
 
 ## Run Dev
 
