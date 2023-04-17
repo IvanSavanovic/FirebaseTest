@@ -16,6 +16,7 @@ import ImagePicker, {ImageOrVideo} from 'react-native-image-crop-picker';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import {RootStackParamList} from '../../App';
 import Loading from '../shared/LoadingScreen/Loading';
+import {CameraRoll} from '@react-native-camera-roll/camera-roll';
 
 type HomeProps = NativeStackScreenProps<RootStackParamList, 'Home', 'Login'>;
 
@@ -64,36 +65,76 @@ const Home = ({navigation, route}: HomeProps): JSX.Element => {
     return status === 'granted';
   };
 
+  const hasWriteAndroidPermisson = async () => {
+    if (Number(Platform.Version) < 30) {
+      const permission = PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE;
+      const hasPermission = await PermissionsAndroid.check(permission);
+      if (hasPermission === false) {
+        const status = await PermissionsAndroid.request(permission);
+        return status === 'granted';
+      }
+    } else {
+      return true;
+    }
+  };
+
   const takeImages = async () => {
     setLoadingCamera(true);
-    if (Platform.OS === 'android' && !(await hasAndroidPermission())) {
+    if (
+      Platform.OS === 'android' &&
+      !(await hasAndroidPermission()) &&
+      !(await hasWriteAndroidPermisson())
+    ) {
       return;
     } else {
       ImagePicker.openCamera({
         width: 300,
         height: 400,
         cropping: true,
-      }).then(image => {
-        setSavedPhoto(image);
-        setDisplay('image');
-      });
+        freeStyleCropEnabled: true,
+      })
+        .then(image => {
+          setSavedPhoto(image);
+          CameraRoll.save(image.path).catch(err =>
+            console.error('CameraRoll: ', err),
+          );
+          setDisplay('image');
+        })
+        .catch(err => {
+          const tmp = String(err).split(' ');
+          if (!tmp.some(x => x === 'cancelled')) {
+            console.error('loadImage: ', String(err));
+          }
+        });
     }
     setLoadingCamera(false);
   };
 
   const loadImage = async () => {
     setLoadingImage(true);
-    if (Platform.OS === 'android' && !(await hasAndroidPermission())) {
+    if (
+      Platform.OS === 'android' &&
+      !(await hasAndroidPermission()) &&
+      !(await hasWriteAndroidPermisson())
+    ) {
       return;
     } else {
       ImagePicker.openPicker({
         width: 300,
         height: 400,
         cropping: true,
-      }).then(image => {
-        setSavedPhoto(image);
-        setDisplay('image');
-      });
+        freeStyleCropEnabled: true,
+      })
+        .then(image => {
+          setSavedPhoto(image);
+          setDisplay('image');
+        })
+        .catch(err => {
+          const tmp = String(err).split(' ');
+          if (!tmp.some(x => x === 'cancelled')) {
+            console.error('loadImage: ', String(err));
+          }
+        });
     }
     setLoadingImage(false);
   };

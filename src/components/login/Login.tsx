@@ -1,4 +1,4 @@
-import React, {useCallback, useState} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import {StyleSheet, View} from 'react-native';
 import auth from '@react-native-firebase/auth';
@@ -6,6 +6,7 @@ import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import {RootStackParamList} from '../../App';
 import {useTheme, TextInput, Text, Button} from 'react-native-paper';
 import {Image} from 'react-native';
+import ImagePicker from 'react-native-image-crop-picker';
 
 type LoginProps = NativeStackScreenProps<RootStackParamList, 'Login', 'Login'>;
 
@@ -16,6 +17,16 @@ const Login = ({navigation}: LoginProps) => {
   const [error, setError] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
   const theme = useTheme();
+
+  useEffect(() => {
+    ImagePicker.clean()
+      .then(() => {
+        console.log('Removed all tmp images from tmp directory');
+      })
+      .catch(err => {
+        console.error('ImagePicker clean: ', err);
+      });
+  }, []);
 
   const login = () => {
     setLoading(true);
