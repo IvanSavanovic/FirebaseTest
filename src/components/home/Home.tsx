@@ -24,6 +24,7 @@ const Home = ({navigation, route}: HomeProps): JSX.Element => {
   const [savedPhoto, setSavedPhoto] = useState<ImageOrVideo>();
   const [display, setDisplay] = useState<string>('default');
   const [runOCR, setRunOcr] = useState<boolean>(false);
+  const [loadingCamera, setLoadingCamera] = useState<boolean>(false);
   const [loadingImage, setLoadingImage] = useState<boolean>(false);
 
   const theme = useTheme();
@@ -64,11 +65,28 @@ const Home = ({navigation, route}: HomeProps): JSX.Element => {
   };
 
   const takeImages = async () => {
-    setLoadingImage(true);
+    setLoadingCamera(true);
     if (Platform.OS === 'android' && !(await hasAndroidPermission())) {
       return;
     } else {
       ImagePicker.openCamera({
+        width: 300,
+        height: 400,
+        cropping: true,
+      }).then(image => {
+        setSavedPhoto(image);
+        setDisplay('image');
+      });
+    }
+    setLoadingCamera(false);
+  };
+
+  const loadImage = async () => {
+    setLoadingImage(true);
+    if (Platform.OS === 'android' && !(await hasAndroidPermission())) {
+      return;
+    } else {
+      ImagePicker.openPicker({
         width: 300,
         height: 400,
         cropping: true,
@@ -139,10 +157,15 @@ const Home = ({navigation, route}: HomeProps): JSX.Element => {
         <View style={styles.buttonContainer}>
           <View style={styles.buttonStyle}>
             <Button
-              loading={loadingImage}
+              loading={loadingCamera}
               mode="contained"
               onPress={takeImages}>
               Take photo
+            </Button>
+          </View>
+          <View style={styles.buttonStyle}>
+            <Button loading={loadingImage} mode="contained" onPress={loadImage}>
+              Load photo
             </Button>
           </View>
         </View>
