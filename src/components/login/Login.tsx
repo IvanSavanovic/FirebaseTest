@@ -22,6 +22,7 @@ const Login = ({navigation}: LoginProps) => {
     auth()
       .signInWithEmailAndPassword(email, password)
       .then(() => {
+        setError('');
         navigation.navigate('Home', {});
       })
       .catch(err => {
