@@ -6,7 +6,6 @@ Used packages:
 
 - [@firebase](https://rnfirebase.io/)
 - [@firebase/auth-types](https://www.npmjs.com/package/@firebase/auth-types)
-- [@react-native-vision-camera](https://github.com/mrousavy/react-native-vision-camera)
 - [@react-native-cameraroll](https://github.com/react-native-cameraroll/react-native-cameraroll)
 - [@react-native-ml-kit/text-recognition](https://www.npmjs.com/package/@react-native-ml-kit/text-recognition?activeTab=readme)
 - [@react-native-clipboard/clipboard](https://github.com/react-native-clipboard/clipboard)
@@ -14,6 +13,10 @@ Used packages:
 - [@react-native-paper](https://callstack.github.io/react-native-paper/docs/guides/getting-started/)
 - [@pictogrammers-icons](https://pictogrammers.com/library/mdi/)
 - [@react-native-image-crop-picker](https://github.com/ivpusic/react-native-image-crop-picker#readme)
+
+Removed:
+
+- [@react-native-vision-camera](https://github.com/mrousavy/react-native-vision-camera)
 
 ## Run Dev
 

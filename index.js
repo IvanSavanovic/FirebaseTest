@@ -107,7 +107,7 @@ const darkTheme = {
   },
 };
 
-export const Main = (): JSX.Element => {
+export const Main = () => {
   const paperTheme =
     useColorScheme() === 'dark'
       ? {...MD3DarkTheme, colors: darkTheme.colors}

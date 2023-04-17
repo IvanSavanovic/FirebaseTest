@@ -1,31 +1,18 @@
-import {
-  CameraRoll,
-  PhotoIdentifier,
-} from '@react-native-camera-roll/camera-roll';
 import TextRecognition from '@react-native-ml-kit/text-recognition';
-import React, {useCallback, useEffect, useRef, useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   Image,
-  Linking,
   PermissionsAndroid,
   Platform,
   SafeAreaView,
   ScrollView,
   StatusBar,
   StyleSheet,
-  ToastAndroid,
-  TouchableOpacity,
   useColorScheme,
   View,
 } from 'react-native';
-import {Text, Button, useTheme} from 'react-native-paper';
-import {
-  Camera,
-  CameraPermissionStatus,
-  useCameraDevices,
-} from 'react-native-vision-camera';
-
-import Section from '../shared/Section/Section';
+import {Button, useTheme} from 'react-native-paper';
+import ImagePicker, {ImageOrVideo} from 'react-native-image-crop-picker';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import {RootStackParamList} from '../../App';
 import Loading from '../shared/LoadingScreen/Loading';
@@ -34,26 +21,18 @@ type HomeProps = NativeStackScreenProps<RootStackParamList, 'Home', 'Login'>;
 
 const Home = ({navigation, route}: HomeProps): JSX.Element => {
   const isDarkMode = useColorScheme() === 'dark';
-  const [savedPhoto, setSavedPhoto] = useState<{photos: PhotoIdentifier[]}>();
-
-  const [cameraPermissionStatus, setCameraPermissionStatus] =
-    useState<CameraPermissionStatus>('not-determined');
+  const [savedPhoto, setSavedPhoto] = useState<ImageOrVideo>();
   const [display, setDisplay] = useState<string>('default');
   const [runOCR, setRunOcr] = useState<boolean>(false);
   const [loadingImage, setLoadingImage] = useState<boolean>(false);
-  const [loadingCamera, setLoadingCamera] = useState<boolean>(false);
-  const devices = useCameraDevices('wide-angle-camera');
-  const device = devices.back;
-  const camera = useRef<Camera>(null);
+
   const theme = useTheme();
 
   useEffect(() => {
     (async () => {
       if (runOCR) {
-        if (savedPhoto && savedPhoto.photos) {
-          const result = await TextRecognition.recognize(
-            savedPhoto.photos[0].node.image.uri,
-          );
+        if (savedPhoto) {
+          const result = await TextRecognition.recognize(savedPhoto.path);
           setRunOcr(false);
           navigation.navigate('Ocr', {
             ocrText: result.text,
@@ -84,57 +63,21 @@ const Home = ({navigation, route}: HomeProps): JSX.Element => {
     return status === 'granted';
   };
 
-  const requestCameraPermission = useCallback(async () => {
-    setLoadingCamera(true);
-    console.log('Requesting camera permission...');
-    const permission = await Camera.requestCameraPermission();
-    console.log(`Camera permission status: ${permission}`);
-
-    if (permission === 'denied') {
-      await Linking.openSettings();
-    }
-    setCameraPermissionStatus(permission);
-
-    if (permission === 'authorized') {
-      setDisplay('camera');
-      setLoadingCamera(false);
-    } else {
-      setLoadingCamera(false);
-    }
-  }, []);
-
-  const loadImages = async () => {
+  const takeImages = async () => {
     setLoadingImage(true);
     if (Platform.OS === 'android' && !(await hasAndroidPermission())) {
       return;
     } else {
-      setDisplay('image');
-      CameraRoll.getPhotos({
-        first: 1,
-        assetType: 'Photos',
-      })
-        .then(r => {
-          setSavedPhoto({photos: r.edges});
-        })
-        .catch(err => {
-          console.error(err);
-        });
+      ImagePicker.openCamera({
+        width: 300,
+        height: 400,
+        cropping: true,
+      }).then(image => {
+        setSavedPhoto(image);
+        setDisplay('image');
+      });
     }
     setLoadingImage(false);
-  };
-
-  const takePhoto = async () => {
-    if (camera && camera.current) {
-      const photo = await camera.current.takePhoto({});
-      CameraRoll.save(photo.path);
-      ToastAndroid.show('Photo Taken', ToastAndroid.SHORT);
-    }
-  };
-
-  const focusePhoto = async () => {
-    if (camera && camera.current) {
-      await camera.current.focus({x: 300, y: 300});
-    }
   };
 
   const renderImageAndOcr = () => {
@@ -144,20 +87,15 @@ const Home = ({navigation, route}: HomeProps): JSX.Element => {
     if (runOCR === false) {
       return (
         <ScrollView>
-          <View style={styles.imageContainer}>
-            {savedPhoto &&
-              savedPhoto.photos.map((p, i) => {
-                return (
-                  <View key={i} style={styles.imageDiv}>
-                    <Image
-                      style={styles.imageSize}
-                      source={{uri: p.node.image.uri}}
-                      resizeMode="contain"
-                    />
-                  </View>
-                );
-              })}
-            {savedPhoto && (
+          {savedPhoto && (
+            <View style={styles.imageContainer}>
+              <View style={styles.imageDiv}>
+                <Image
+                  style={styles.imageSize}
+                  source={{uri: savedPhoto.path}}
+                  resizeMode="contain"
+                />
+              </View>
               <View style={styles.imageButtonDiv}>
                 <View style={styles.imageButton}>
                   <Button
@@ -178,76 +116,12 @@ const Home = ({navigation, route}: HomeProps): JSX.Element => {
                   </Button>
                 </View>
               </View>
-            )}
-          </View>
+            </View>
+          )}
         </ScrollView>
       );
     } else {
       return <Loading />;
-    }
-  };
-
-  const cameraView = () => {
-    if (device == null) {
-      return (
-        <View
-          style={{
-            backgroundColor: theme.colors.background,
-          }}>
-          <Section title="No device">
-            <Text style={{color: theme.colors.error}}>
-              There is <Text style={styles.highlight}>No Device!</Text>
-            </Text>
-          </Section>
-        </View>
-      );
-    }
-    if (cameraPermissionStatus === 'authorized') {
-      return (
-        <SafeAreaView key={display} style={styles.cameraView}>
-          <Camera
-            style={styles.cameraSection}
-            device={device}
-            isActive={true}
-            ref={camera}
-            photo={true}
-          />
-          <View style={styles.takePhotoContainer}>
-            <TouchableOpacity
-              style={styles.cameraButton}
-              onPress={() => {
-                takePhoto();
-              }}
-              onPressIn={() => {
-                focusePhoto();
-              }}>
-              <Text style={{color: theme.colors.onPrimary}}>Take Photo</Text>
-            </TouchableOpacity>
-          </View>
-          <View style={styles.closeContainer}>
-            <TouchableOpacity
-              style={styles.cameraButton}
-              onPress={() => {
-                setDisplay('');
-              }}>
-              <Text style={{color: theme.colors.onPrimary}}>Close</Text>
-            </TouchableOpacity>
-          </View>
-        </SafeAreaView>
-      );
-    } else {
-      return (
-        <View
-          style={{
-            backgroundColor: theme.colors.background,
-          }}>
-          <Section title="No device or no camera authorization">
-            <Text style={[styles.highlight, {color: theme.colors.error}]}>
-              Something went wrong!
-            </Text>
-          </Section>
-        </View>
-      );
     }
   };
 
@@ -265,20 +139,10 @@ const Home = ({navigation, route}: HomeProps): JSX.Element => {
         <View style={styles.buttonContainer}>
           <View style={styles.buttonStyle}>
             <Button
-              loading={loadingCamera}
-              mode="contained"
-              onPress={() => {
-                requestCameraPermission();
-              }}>
-              Open camera
-            </Button>
-          </View>
-          <View style={styles.buttonStyle}>
-            <Button
               loading={loadingImage}
               mode="contained"
-              onPress={loadImages}>
-              Load Image
+              onPress={takeImages}>
+              Take photo
             </Button>
           </View>
         </View>
@@ -287,8 +151,6 @@ const Home = ({navigation, route}: HomeProps): JSX.Element => {
   };
 
   switch (display) {
-    case 'camera':
-      return cameraView();
     case 'image':
       return renderImageAndOcr();
     default:
