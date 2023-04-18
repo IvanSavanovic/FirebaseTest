@@ -110,6 +110,7 @@ const App = (): JSX.Element => {
               headerTitleStyle: {
                 fontWeight: 'bold',
               },
+              headerBackVisible: false,
             }}
           />
           <Stack.Screen

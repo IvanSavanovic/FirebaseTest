@@ -147,6 +147,7 @@ const Register = ({navigation}: RegisterProps) => {
           disabled={email === '' || password === '' || confirmPassword === ''}
           loading={loading}
           mode="contained"
+          buttonColor={'rgb(250, 79, 151)'}
           labelStyle={styles.buttonText}
           onPress={register}>
           Register

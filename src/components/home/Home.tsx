@@ -200,12 +200,17 @@ const Home = ({navigation, route}: HomeProps): JSX.Element => {
             <Button
               loading={loadingCamera}
               mode="contained"
-              onPress={takeImages}>
+              onPress={takeImages}
+              buttonColor={isDarkMode ? '' : 'rgb(250, 79, 151)'}>
               Take photo
             </Button>
           </View>
           <View style={styles.buttonStyle}>
-            <Button loading={loadingImage} mode="contained" onPress={loadImage}>
+            <Button
+              loading={loadingImage}
+              mode="contained"
+              onPress={loadImage}
+              buttonColor={isDarkMode ? '' : 'rgb(250, 79, 151)'}>
               Load photo
             </Button>
           </View>

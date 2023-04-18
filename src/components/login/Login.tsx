@@ -1,6 +1,6 @@
 import React, {useCallback, useEffect, useState} from 'react';
 import {SafeAreaView} from 'react-native-safe-area-context';
-import {StyleSheet, View} from 'react-native';
+import {StyleSheet, View, useColorScheme} from 'react-native';
 import auth from '@react-native-firebase/auth';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import {RootStackParamList} from '../../App';
@@ -11,6 +11,7 @@ import ImagePicker from 'react-native-image-crop-picker';
 type LoginProps = NativeStackScreenProps<RootStackParamList, 'Login', 'Login'>;
 
 const Login = ({navigation}: LoginProps) => {
+  const isDarkMode = useColorScheme() === 'dark';
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
   const [isPasswordSecure, setIsPasswordSecure] = useState<boolean>(true);
@@ -118,7 +119,8 @@ const Login = ({navigation}: LoginProps) => {
           style={[styles.button]}
           mode="contained"
           labelStyle={styles.buttonText}
-          onPress={login}>
+          onPress={login}
+          buttonColor={isDarkMode ? '' : 'rgb(250, 79, 151)'}>
           Sing In
         </Button>
       </View>
