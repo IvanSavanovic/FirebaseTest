@@ -20,10 +20,22 @@ Removed:
 
 ## Run Dev
 
-- root: `npx react-native run-android`
-- \android: `npx react-native start`
+To start Metro Bundler run:
+
+- `npx react-native start`
+
+Let Metro Bundler run in its own terminal. Open a new terminal inside your React Native project folder (root). Run the following:
+
+- `npx react-native run-android`
+
+Other option is to run one of commands in:
+
+- root: `npx react-native run-android` or in
+- /android: `npx react-native start`
 
 ## Run Build
+
+You can also use the React Native CLI to generate and run a Release build:
 
 - `npx react-native run-android --mode=release`
 
@@ -38,8 +50,10 @@ Steps 1. and 2. needs to be done once for project.
 1.  Make sure you have an assets folder under `android/app/src/main/assets`. If it's not there, create one.
 2.  Then in `root`:
     - `npx react-native bundle --platform android --dev false --entry-file index.js --bundle-output android/app/src/main/assets/index.android.bundle --assets-dest android/app/src/main/res/`
-3.  In `/android`:
-    - `./gradlew assembleRelease` - to build APK. It is located in `android/app/build/outputs/apk/app-release.apk`.
+3.  To build APK, in `/android`:
+    - `./gradlew assembleRelease`
+
+APK is located in `android/app/build/outputs/apk/app-release.apk`.
 
 ### Error:
 
